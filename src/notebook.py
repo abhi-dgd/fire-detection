@@ -36,6 +36,7 @@ IMG_HEIGHT = 150
 IMG_WIDHT = 150
 BATCH_SIZE = 32
 INPUT_SHAPE = (150, 150, 3)
+VIEW_DATASET_IMAGES = False
 
 # File paths
 FIRE_DET_PATH = '/Users/abhidgd/Desktop/mcmaster/cps-dl/fire-detection'
@@ -159,19 +160,21 @@ print("[INFO] : Class names:", train_ds.class_names)
 # In[ ]:
 
 
-# i = 1
-for (image, label) in train_ds.take(1):
-    # Plot the first 9 images
-    plt.figure(figsize=(10, 10))
-    for i in range(9):
-        ax = plt.subplot(3, 3, i + 1)
-        plt.imshow(image[i].numpy().astype("uint8"))
-        plt.title(train_ds.class_names[label[i]])
-        plt.axis("Off")
-    plt.show()
+if VIEW_DATASET_IMAGES:
+    print("-" * 80)
+    print('[INFO] : Showing image from training dataset with 20% validation data.')
 
-print("-" * 80)
-print('[INFO] : Showing image from training dataset with 20% validation data.')
+    for (image, label) in train_ds.take(1):
+        # Plot the first 9 images
+        plt.figure(figsize=(10, 10))
+        for i in range(9):
+            ax = plt.subplot(3, 3, i + 1)
+            plt.imshow(image[i].numpy().astype("uint8"))
+            plt.title(train_ds.class_names[label[i]])
+            plt.axis("Off")
+        plt.show()
+else:
+    pass
 
 
 # In[ ]:
