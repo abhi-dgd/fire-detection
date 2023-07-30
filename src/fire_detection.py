@@ -16,92 +16,39 @@ import tensorflow as tf
 import keras
 
 
-# Constants
-EPOCHS = 100
-TRAIN_BATCH_SIZE = 8
-VAL_BATCH_SIZE = 8
-# File paths
-DATASET = './fire-detection/data'
-GOOD_IMG_PATH = DATASET + '/good'
-BAD_IMG_PATH = DATASET + '/bad'
-FIRE_IMGPATH = GOOD_IMG_PATH + '/1.jpg'
-RAND_IMGPATH = BAD_IMG_PATH + '/1.jpg'
-CHECKPOINT_FILEPATH = './fire-detection/temp/checkpoint'
-
-
-def count_files_in_folders(parent_folder) -> dict:
-    """Count files in given folder. Return dictionary with folder and count."""
-    folder_names = os.listdir(parent_folder)
-    file_count = {}
-
-    for folder_name in folder_names:
-        folder_path = os.path.join(parent_folder, folder_name)
-        if os.path.exists(folder_path) and os.path.isdir(folder_path):
-            file_count[folder_name] = len(
-                [file for file in os.listdir(folder_path) if os.path.isfile(
-                    os.path.join(folder_path, file)
-                    )
-                ]
-            )
-        else:
-            file_count[folder_name] = 0
-
-    return file_count
-
-
-def load_and_prep_image(filename, img_shape = 300):
-    """Funtion to read image and transform image to tensor."""
-    img = tf.io.read_file(filename) #read image
-    img = tf.image.decode_image(img) # decode the image to a tensor
-    img = tf.image.resize(img, size = [img_shape, img_shape]) # resize the image
-    return img
-
-
-def pred_and_plot(model, filename, class_names):
-    """Funtion to read image and give desired output with image.
-
-    Imports an image located at filename, makes a prediction on it with
-    a trained model and plots the image with the predicted class as the title.
-    """
-    # Import the target image and preprocess it
-    img = load_and_prep_image(filename)
-    
-    # Make a prediction
-    pred = model.predict(tf.expand_dims(img, axis=0))
-    
-    if len(pred[0]) > 1: # check for multi-class
-        pred_class = class_names[pred.argmax()] # if more than one output, take the max
-    else:
-        pred_class = class_names[int(tf.round(pred)[0][0])] # if only one output, round
-
-    # Plot the image and predicted class
-    sh_image = plt.imread(filename)
-    plt.imshow(sh_image)
-    plt.title(f"Prediction: {pred_class}")
-    plt.axis(False)
-
-    # specifying path to sample image from list of test images.
-
+import config
+import auxiliary
 
 if __name__ == "__main__":
     #%% Dataset breakdown
-    file_info : dict = count_files_in_folders(DATASET)
+    file_info : dict = auxiliary.count_files_in_folders(config.DATASET)
     for folder, count in file_info.items():
         print(f'[INFO] : Found {count} images in {folder} subdir')
 
-    # Using tensorflow's ImageDataGenerator to prepare the image-data for training
-    train_gen = ImageDataGenerator(
-                    width_shift_range = 0.5, height_shift_range = 0.5,
-                    validation_split = 0.2,
-    )
-    train_set = train_gen.flow_from_directory(DATASET, target_size = (300, 300),
-                    class_mode = 'binary', subset = 'training',
-                    batch_size = TRAIN_BATCH_SIZE,
-    )
-    val_set = train_gen.flow_from_directory(DATASET, target_size = (300, 300),
-                    class_mode = 'binary', subset = 'validation',
-                    batch_size = VAL_BATCH_SIZE,
-    )
+    train_ds = tf.keras.utils.image_dataset_from_directory(
+        config.DATASET, validation_split=0.2,
+        image_size=(config.IMG_HEIGHT, config.IMG_WIDHT),
+        batch_size=config.TRAIN_BATCH_SIZE, subset="training",
+        seed=20,)
+
+    val_ds = tf.keras.utils.image_dataset_from_directory(
+        config.DATASET, validation_split=0.2,
+        image_size=(config.IMG_HEIGHT, config.IMG_WIDHT),
+        batch_size=config.VAL_BATCH_SIZE, subset="validation",
+        seed=20,)
+    
+    test_ds = tf.keras.utils.image_dataset_from_directory(
+        config.DATASET, validation_split=0.2,
+        image_size=(config.IMG_HEIGHT, config.IMG_WIDHT),
+        batch_size=config.VAL_BATCH_SIZE, subset="validation",
+        seed=20,)
+
+    class_names = train_ds.class_names
+    print(class_names)
+
+    AUTOTUNE = tf.data.AUTOTUNE
+    train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
+    val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
     # Using pre-trained Resnet-50 layers model to train on our fire-dataset
     # here we are setting include_top as False, as we will add our own dense layers
@@ -182,7 +129,7 @@ if __name__ == "__main__":
     plt.figure(figsize=(10, 6)) # Set the figure size
     plt.grid(True) # Set the grid
     plt.semilogx(lrs, model_hist.history["loss"]) # Plot the loss in log scale
-    plt.tick_params('both', length=10, width=1, which='both') # Increase tickmark size
+    plt.tick_config('both', length=10, width=1, which='both') # Increase tickmark size
     plt.axis([1e-8, 1e-3, 0, 1]) # Set the plot boundaries
 
 
