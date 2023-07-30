@@ -299,4 +299,31 @@ if __name__ == "__main__":
         print("[INFO] : Trying to save a HDF5 model format.")
         model.save(SAVE_H5_MODEL,)
         print("[INFO] : Saved .h5 model successfully.")
-    
+
+    # In[ ]:
+
+
+    # Creating graph to visualzie how our model performed at different learning
+    # rate and its loss.
+    lrs = 1e-8 * (10 ** (np.arange(100) / 20))
+    plt.figure(figsize=(10, 6))
+    plt.grid(True)
+    # Plot the loss in log scale
+    plt.semilogx(lrs, model_hist.history["loss"])
+    plt.tick_params(
+        'both',
+        length=10,
+        width=1,
+        which='both'
+    ) # Increase the tickmarks size
+    plt.axis([1e-8, 1e-3, 0, 1]) # Set the plot boundaries
+
+
+    # # Model evaluation
+
+    # In[ ]:
+
+
+    # Run the model on the test dataset
+    model_hist.evaluate(test_ds)
+
