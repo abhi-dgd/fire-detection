@@ -166,3 +166,8 @@ cython_debug/
 
 # Doc files
 *.pdf
+
+# Ignore Keras and h5 model files
+*.keras
+*.h5
+*.pb
