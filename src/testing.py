@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
-
+__doc__ = """Script to test the trained model. Path must be confirmed.
+Images are provided randomly based on folder indexing and randomly generated
+numbers."""
 
 # In[]:
 # Import Python packages

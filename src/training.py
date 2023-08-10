@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
+__doc__ = """Script to run ResNet50 training on fire and non-fire image
+dataset. Saves model in provided location. For later use."""
 
 
 # In[ ]:
