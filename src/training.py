@@ -253,7 +253,6 @@ if __name__ == "__main__":
     model.add(Dense(250, activation = 'relu'))
     model.add(Dense(100, activation = 'relu'))
     model.add(Dense(1, activation = 'sigmoid'))
-
     model.summary()
 
 
@@ -286,8 +285,6 @@ if __name__ == "__main__":
 
 
     # In[ ]:
-
-
     # Train model
     print("-" * 80)
     print("[INFO] : Starting model fitting with callbacks.")
@@ -297,7 +294,7 @@ if __name__ == "__main__":
             callbacks = [learning_rate_callback,  model_checkpoint_callback,],
     )
 
-    # Save model weights
+    # Save model weights so that we can reuse model as and when required
     try:
         print("[INFO] : Trying to save a .keras format model.")
         model.save(SAVE_KERAS_MODEL)
@@ -308,10 +305,7 @@ if __name__ == "__main__":
         model.save(SAVE_H5_MODEL,)
         print("[INFO] : Saved .h5 model successfully.")
 
-    # # Model evaluation
-
     # In[ ]:
-
-
+    # # Model evaluation
     # Evaluate model performance on test dataset
     model_hist.evaluate(test_ds)
