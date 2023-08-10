@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ## Imports
 
 # In[ ]:
-
-
 # Import Python packages
 import os
 
@@ -25,18 +22,23 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 print('Tensorflow version', tf.version.VERSION)
 
 
-# ## Constants
+__author__ = "Abhishek Degadwala"
+__copyright__ = "None"
+__credits__ = ["Abhishek Degadwala", "Galvin Fernandes", "Romanch Shah",]
+__version__ = "1.0.0"
+__maintainer__ = "Abhishek Degadwala"
+__email__ = "degadwaa@mcmaster.ca"
+__status__ = "Production"
+
 
 # In[ ]:
-
-
 # Constants
 EPOCHS = 20
 IMG_HEIGHT = 150
 IMG_WIDHT = 150
 BATCH_SIZE = 32
 INPUT_SHAPE = (150, 150, 3)
-VIEW_DATASET_IMAGES = False
+VIEW_DATASET_IMAGES = False # set to True to view images
 
 # File paths
 FIRE_DET_PATH = '/Users/abhidgd/Desktop/mcmaster/cps-dl/fire-detection'
@@ -65,13 +67,22 @@ print(f"[DEBUG] : If required saving HDF5 extension model to {SAVE_H5_MODEL}",)
 
 
 
-# ## Functions
-
 # In[ ]:
-
-
+# Functions
 def count_files_in_folders(parent_folder) -> dict:
-    """Count files in given folder. Return dictionary with folder and count."""
+    """Count files in given folder. Return dictionary with folder and count.
+    
+    Parameters
+    ----------
+    parent_folder: str;
+        Folder who's sub folders and files are desired to be counted.
+    
+    Return
+    ------
+    file_count: dict;
+        Python dict with folder name and number of files in folder. Within
+        parent folder.
+    """
     folder_names = os.listdir(parent_folder)
     file_count = {}
 
@@ -90,22 +101,42 @@ def count_files_in_folders(parent_folder) -> dict:
     return file_count
 
 
-def load_and_prep_image(filename, img_shape = 150):
-    """Funtion to read image and transform image to tensor."""
+def preprocess_image(filename, img_shape = 150):
+    """Funtion to read image and transform image to tensor.
+    
+    Parameters
+    ----------
+    filename: str;
+        Image path to test model with.
+
+    img_shape: int;
+        Size of the image in pixels. Any given image will be resized to given
+        dimension. Must match input image width and height. 
+    """
+
     img = tf.io.read_file(filename) #read image
     img = tf.image.decode_image(img) # decode the image to a tensor
     img = tf.image.resize(img, size = [img_shape, img_shape]) # resize the image
     return img
 
 
-def pred_and_plot(model, filename, class_names):
+def predict(model, filename, class_names: list):
     """Funtion to read image and give desired output with image.
 
-    Imports an image located at filename, makes a prediction on it with
-    a trained model and plots the image with the predicted class as the title.
+    Parameters
+    ----------
+    model: keras object;
+        Pretrained existing or custom trained model weights.
+    
+    filename: str;
+        Image path to test model with.
+
+    class_name: list;
+        List of class names.
     """
+
     # Import the target image and preprocess it
-    img = load_and_prep_image(filename)
+    img = preprocess_image(filename)
     
     # Make a prediction
     pred = model.predict(tf.expand_dims(img, axis=0))
@@ -125,11 +156,8 @@ def pred_and_plot(model, filename, class_names):
     plt.show()
 
 
-
-# ## Get data
-
 # In[ ]:
-
+# Get data
 if __name__ == "__main__":
     train_ds = tf.keras.utils.image_dataset_from_directory(
             DATASET,
@@ -153,12 +181,8 @@ if __name__ == "__main__":
     print("[INFO] : BatchDataset type objects returned.")
     print("[INFO] : Class names:", train_ds.class_names)
 
-
-    # ## View image data
-
     # In[ ]:
-
-
+    # View image data
     if VIEW_DATASET_IMAGES:
         print("-" * 80)
         print('[INFO] : Showing image from training dataset with 20% validation data.')
@@ -177,8 +201,6 @@ if __name__ == "__main__":
 
 
     # In[ ]:
-
-
     # Use caching and prefetching to optimize loading speed
     AUTOTUNE = tf.data.AUTOTUNE
     train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
@@ -189,21 +211,6 @@ if __name__ == "__main__":
 
 
     # In[ ]:
-
-
-    # Introduce randomly flipped images to introduce generalization and reduce
-    # overfitting
-    data_augmentation = keras.Sequential(
-        [
-            layers.RandomFlip("horizontal"),
-            layers.RandomRotation(0.1),
-        ]
-    )
-
-
-    # In[ ]:
-
-
     # Using pre-trained Resnet-50 layers model to train on our fire-dataset
     # here we are setting include_top as False, as we will add our own dense layers after resnet 50 last layer
     pre_trained_resnet_50 = tf.keras.applications.ResNet50(include_top = False,
@@ -289,7 +296,7 @@ if __name__ == "__main__":
             callbacks = [learning_rate_callback,  model_checkpoint_callback,],
     )
 
-    # Save model parameters
+    # Save model weights
     try:
         print("[INFO] : Trying to save a .keras format model.")
         model.save(SAVE_KERAS_MODEL)
@@ -300,30 +307,10 @@ if __name__ == "__main__":
         model.save(SAVE_H5_MODEL,)
         print("[INFO] : Saved .h5 model successfully.")
 
-    # In[ ]:
-
-
-    # Creating graph to visualzie how our model performed at different learning
-    # rate and its loss.
-    lrs = 1e-8 * (10 ** (np.arange(100) / 20))
-    plt.figure(figsize=(10, 6))
-    plt.grid(True)
-    # Plot the loss in log scale
-    plt.semilogx(lrs, model_hist.history["loss"])
-    plt.tick_params(
-        'both',
-        length=10,
-        width=1,
-        which='both'
-    ) # Increase the tickmarks size
-    plt.axis([1e-8, 1e-3, 0, 1]) # Set the plot boundaries
-
-
     # # Model evaluation
 
     # In[ ]:
 
 
-    # Run the model on the test dataset
+    # Evaluate model performance on test dataset
     model_hist.evaluate(test_ds)
-
