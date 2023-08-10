@@ -201,7 +201,8 @@ if __name__ == "__main__":
 
 
     # In[ ]:
-    # Use caching and prefetching to optimize loading speed
+    # Use caching and prefetching to optimize loading speed and avoid memory
+    # allocation error
     AUTOTUNE = tf.data.AUTOTUNE
     train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
     test_ds = test_ds.cache().prefetch(buffer_size=AUTOTUNE)
@@ -212,12 +213,15 @@ if __name__ == "__main__":
 
     # In[ ]:
     # Using pre-trained Resnet-50 layers model to train on our fire-dataset
-    # here we are setting include_top as False, as we will add our own dense layers after resnet 50 last layer
-    pre_trained_resnet_50 = tf.keras.applications.ResNet50(include_top = False,
-                                                        input_shape = INPUT_SHAPE,
-                                                        pooling = 'avg',
-                                                        classes = 100,
-                                                        weights = 'imagenet')
+    # Set include_top as False. To freeze trainable layers and add our dense
+    # layer configuration after
+    pre_trained_resnet_50 = tf.keras.applications.ResNet50(
+        include_top = False,
+        input_shape = INPUT_SHAPE,
+        pooling = 'avg',
+        classes = 100,
+        weights = 'imagenet'
+    )
 
     # Here we want last 10 layers to be trainable so freezing first 40 layers
     x = 0
@@ -232,40 +236,37 @@ if __name__ == "__main__":
 
 
     # In[ ]:
-
-
-    # Adding extra Dense layers after Resnet 50 last layer, we do this to increase
-    # our models capability to categorise image as having fire or not having fire
+    # Adding extra Dense layers after Resnet 50 last layer.
+    # This is to increase our trained models capability to categorise image
+    # into fire or not
     model = Sequential()
     model.add(pre_trained_resnet_50)
-    model.add(Dense(2048, activation='relu'))
-    model.add(Dense(4096, activation='relu'))
+    model.add(Dense(2048, activation = 'relu'))
+    model.add(Dense(4096, activation = 'relu'))
     model.add(Dropout(0.2))
-    model.add(Dense(8000, activation='relu'))
+    model.add(Dense(8000, activation = 'relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(4000, activation='relu'))
-    model.add(Dense(2000, activation='relu'))
-    model.add(Dense(1000, activation='relu'))
-    model.add(Dense(500, activation='relu'))
-    model.add(Dense(250, activation='relu'))
-    model.add(Dense(100, activation='relu'))
+    model.add(Dense(4000, activation = 'relu'))
+    model.add(Dense(2000, activation = 'relu'))
+    model.add(Dense(1000, activation = 'relu'))
+    model.add(Dense(500, activation = 'relu'))
+    model.add(Dense(250, activation = 'relu'))
+    model.add(Dense(100, activation = 'relu'))
     model.add(Dense(1, activation = 'sigmoid'))
 
     model.summary()
 
 
     # In[ ]:
-
-
-    # Using tensorflow's learning-rate-scheduler to change learning rate at each epoch
-    # this will help us to find the best learning rate for our model
+    # Using the learning-rate-scheduler to modify the learning rate
+    # after each epoch
     learning_rate_callback = tf.keras.callbacks.LearningRateScheduler(
                 lambda epoch: 1e-8 * 10**(epoch/20)
     )
     print("-" * 80)
     print("[INFO] : Learning rate callback scheduled.")
 
-    # Using tensorflow's ModelCheckpoint to save best model having less validation loss
+    # Using ModelCheckpoint to save the best model. With the least validation loss
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath = CHECKPOINT_FILEPATH, monitor = 'val_loss',
         save_best_only = True,
@@ -273,7 +274,7 @@ if __name__ == "__main__":
     print("-" * 80)
     print("[INFO] : Model checkpoint callback scheduled.")
 
-    # Using Adam optimizer to optimize our model to better learn on our dataset
+    # Compile model using Adam optimizer
     model.compile(
         optimizer = tf.keras.optimizers.Adam(),
         loss = 'binary_crossentropy',
