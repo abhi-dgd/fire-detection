@@ -7,7 +7,7 @@ I. Steps to recreate model training
     4. Check path setup once again. (Note: predict folder with data should not be
         in the same folder as training data.)
     5. Activate environment
-    6. Start training
+    6. Start training using the training.py script
 
 II. Steps to test model on random unseen images
     1. Download random images containing a fire or not in them
@@ -15,9 +15,10 @@ II. Steps to test model on random unseen images
         into cloned repository's predict folder
     2. Standard size should be 1280 * 720
     3. Images will get resized when fed to predict
-    4. Check path setup once again. (Note: predict folder with data should not be
+    4. Activate environment
+    5. Check if .keras model is stored in model folder after training
+    6. Check path setup once again. (Note: predict folder with data should not be
         in the same folder as training data.)
-    5. Activate environment
-    6. Start testing
-    7. Random images are automatically indexed from folder and provided to model
+    7. Start testing using the testing.py
+    8. Random images are automatically indexed from folder and provided to model
         to test
