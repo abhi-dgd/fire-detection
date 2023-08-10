@@ -55,6 +55,7 @@ RAND_IMG = NO_FIRE_IMG_PATH + '/1.jpg'
 CHECKPOINT_FILEPATH = FIRE_DET_PATH + '/temp/checkpoint'
 KERAS_MODEL = FIRE_DET_PATH + '/model/retrained_imagenet.keras'
 HDF5_MODEL = FIRE_DET_PATH + '/model/retrained_imagenet.h5'
+SAVE_GRAPH = FIRE_DET_PATH + '/output/training_graph'
 
 print("-" * 80)
 print("[INFO] : Constants defined")
@@ -66,6 +67,7 @@ print("[DEBUG] : Input image shape = ", INPUT_SHAPE)
 print(f"[DEBUG] : Saving model checkpoints to {CHECKPOINT_FILEPATH}",)
 print(f"[DEBUG] : Saving keras extension model to {KERAS_MODEL}",)
 print(f"[DEBUG] : If required, saving HDF5 extension model to {HDF5_MODEL}",)
+print(f"[DEBUG] : Saving model training graph to {SAVE_GRAPH}",)
 
 
 
@@ -339,7 +341,12 @@ plt.tick_params(
     which='both'
 ) # Increase the tickmarks size
 plt.axis([1e-8, 1e-3, 0, 1]) # Set the plot boundaries
-
+plt.show()
+plt.savefig(SAVE_GRAPH, dpi='figure', format='png', metadata=None,
+        bbox_inches=None, pad_inches=0.1,
+        facecolor='auto', edgecolor='auto',
+        backend=None,
+)
 
 # # Model evaluation
 
